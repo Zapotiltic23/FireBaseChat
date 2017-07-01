@@ -92,11 +92,12 @@ class MessagesController: UITableViewController {
                 
                 let message = Message(dictionary: dictionary)//Create a reference to our message array
                 
-                //Assign values to our class' properties
-                message.fromId = dictionary["fromId"] as! String?
-                message.toId = dictionary["toId"] as! String?
-                message.timeStamp = dictionary["timeStamp"] as! NSNumber?
-                message.text = dictionary["text"] as! String?
+//                //Assign values to our class' properties
+//                message.fromId = dictionary["fromId"] as! String?
+//                message.toId = dictionary["toId"] as! String?
+//                message.timeStamp = dictionary["timeStamp"] as! NSNumber?
+//                message.text = dictionary["text"] as! String?
+//                message.imageUrl = dictionary["imageUrl"] as! String?
                 
                 if let chatParterId = message.chatParterId(){
                     self.messagesDictionary[chatParterId] = message

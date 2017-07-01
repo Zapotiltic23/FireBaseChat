@@ -43,25 +43,14 @@ extension UIImageView{
             }
             
             //Succesfully downloaded image data
-            
-            
-                
                 DispatchQueue.main.async(execute: {
                     if let downloadedImage  = UIImage(data: data!){
-                        
                         imageCache.setObject(downloadedImage, forKey: urlString as AnyObject) // Saved downloaded image to the cache
                         self.image = downloadedImage // Set the profile images to the cell view
                     }
-                    
                 })
-                
-            
-            
-            
         }).resume() //resume session so the changes take effect
     }
-
-    
 }
 
 

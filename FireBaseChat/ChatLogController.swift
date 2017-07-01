@@ -143,6 +143,8 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 
                 if let imageUrl = metadata?.downloadURL()?.absoluteString{
                     
+                
+                    
                     self.sendMessagWithImageUrl(imageUrl: imageUrl)
                 }
             })
@@ -195,12 +197,6 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         //setUpKeyboardObservers() //Sets up and dismiss observers when the keyboard is toggled on & off
     }
     
-//    override var inputView: UIView?{
-//        get{
-//            return inputContainerView
-//        }
-//    }
-    
     override var inputAccessoryView: UIView? {
         get {
             return inputContainerView
@@ -210,11 +206,6 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     override var canBecomeFirstResponder : Bool {
         return true
     }
-    
-    
-//    override func canBecomeFirstResponder() -> Bool {
-//        return true
-//    }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -338,27 +329,34 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         if let profileImageUrl = self.user?.profileImageUrl{
             cell.profileImageView.loadImageusingCacheWithUrlString(urlString: profileImageUrl)
         }
-        
         //Check if the incoming message is from the current user. If it is, that means we wrote a message so it should be render blue(green) color.
         //If it's not, then it's an incoming message from a different user so it should be render out gray!
         if message.fromId == Auth.auth().currentUser?.uid{
             
             //Blue bubble chat
             cell.bubbleView.backgroundColor = ChatMessageCell.blueColor
+            cell.textView.textColor = UIColor.white
+            cell.profileImageView.isHidden = true
             
             cell.bubbleViewLeftAnchor?.isActive = false
             cell.bubbleViewRightAnchor?.isActive = true
-            cell.profileImageView.isHidden = true
-            
             
         } else {
             //Grey Bubble Chat
             cell.bubbleView.backgroundColor = UIColor(r: 240, g: 240, b: 240)
             cell.textView.textColor = UIColor.black
+            cell.profileImageView.isHidden = false
             
             cell.bubbleViewLeftAnchor?.isActive = true
             cell.bubbleViewRightAnchor?.isActive = false
-            cell.profileImageView.isHidden = false
+        }
+        
+        if let messageImageUrl = message.imageUrl{
+            cell.messageImageView.loadImageusingCacheWithUrlString(urlString: messageImageUrl)
+            cell.messageImageView.isHidden = false
+            cell.bubbleView.backgroundColor = UIColor.clear
+        }else{
+            cell.messageImageView.isHidden = true
         }
         
         
