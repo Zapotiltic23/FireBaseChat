@@ -177,6 +177,7 @@
 				TargetAttributes = {
 					D79608771E983DFC00AFF8FE = {
 						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = S4LHGXBCB7;
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
@@ -413,6 +414,7 @@
 			baseConfigurationReference = 2C23CB4AE56DBC4EF41EED95 /* Pods-FireBaseChat.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = S4LHGXBCB7;
 				INFOPLIST_FILE = FireBaseChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = HS.FireBaseChat;
@@ -427,6 +429,7 @@
 			baseConfigurationReference = FE94ECA71C75BE375036F31B /* Pods-FireBaseChat.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = S4LHGXBCB7;
 				INFOPLIST_FILE = FireBaseChat/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = HS.FireBaseChat;

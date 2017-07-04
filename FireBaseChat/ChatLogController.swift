@@ -30,7 +30,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         containerView.backgroundColor = UIColor.white
         
         let uploadImageView = UIImageView()
-        uploadImageView.image = UIImage(named: "PokeCoin")
+        uploadImageView.image = UIImage(named: "rayo")?.withRenderingMode(.alwaysOriginal)
         uploadImageView.translatesAutoresizingMaskIntoConstraints = false
         uploadImageView.isUserInteractionEnabled = true
         uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleUploadTap)))
@@ -143,41 +143,9 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 
                 if let imageUrl = metadata?.downloadURL()?.absoluteString{
                     
-                
-                    
-                    self.sendMessagWithImageUrl(imageUrl: imageUrl)
+                    self.sendMessagWithImageUrl(imageUrl: imageUrl, image: image)
                 }
             })
-        }
-        
-    }
-    
-    private func sendMessagWithImageUrl(imageUrl: String){
-        
-        let ref = Database.database().reference().child("messages") //Make a reference to the database & create new node "messages"
-        let childRef = ref.childByAutoId() // Create unique id nodes for each child of "messages"
-        let toId = user?.id
-        let fromId = Auth.auth().currentUser!.uid //Grab the currents user's uid
-        let timeStamp = Int(NSDate().timeIntervalSince1970)
-        let values = ["imageUrl": imageUrl, "toId": toId!, "fromId": fromId, "timeStamp": timeStamp] as [String : Any] //Create the expected dictionary containing the string of our text field
-        childRef.updateChildValues(values) //Update the database
-        inputTextField.text = nil //Erase the text when 'send' is tapped
-        
-        childRef.updateChildValues(values) { (error, ref) in
-            
-            if error != nil{
-                print(error!)
-                return
-            }
-            
-            let userMessagesRef = Database.database().reference().child("user-messages").child(fromId).child(toId!)
-            let messageId = childRef.key
-            
-            userMessagesRef.updateChildValues([messageId:1])
-            
-            let recipientUserMessageRef = Database.database().reference().child("user-messages").child(toId!).child(fromId)
-            
-            recipientUserMessageRef.updateChildValues([messageId:1])
         }
         
     }
@@ -216,11 +184,20 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     
     func setUpKeyboardObservers(){
         
-        //This oberserver assists the keyboard showing up with out text field on top
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardDidShow), name: Notification.Name.UIKeyboardDidShow, object: nil)
+//        //This oberserver assists the keyboard showing up with out text field on top
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+//
+//        //This oberserver assists the keyboard dismissing up with out text field on top
+//        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+    }
+    
+    @objc func handleKeyboardDidShow(){
         
-        //This oberserver assists the keyboard dismissing up with out text field on top
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        if messages.count > 0{
+            let indexPath = IndexPath(item: messages.count - 1, section: 0)
+            collectionView?.scrollToItem(at: indexPath, at: .top, animated: true)
+        }
     }
     
     @objc func handleKeyboardWillHide(notification: NSNotification){
@@ -282,6 +259,9 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                     self.messages.append(message)
                     DispatchQueue.main.async(execute: {
                     self.collectionView?.reloadData()
+                    //scroll to the last message
+                        let indexPath = IndexPath(item: self.messages.count - 1, section: 0)
+                        self.collectionView?.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 })
                 
             }, withCancel: nil)
@@ -300,9 +280,21 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         var height: CGFloat = 80
         
         //Adjust the height of the bubble chat cell according to the amount of text inside of it
+        
+        let message = messages[indexPath.item]
         if let text = messages[indexPath.item].text {
             height = estimatedframeForText(text: text).height + 20
+        } else if let imageWidth = message.imageWidth?.floatValue, let imageHeight = message.imageHeight?.floatValue{
+            //fall in here if it's an image message
+            //Modify dimwnsions of bubble to fit the dimensions of the image message
+            
+            height = CGFloat(imageHeight / imageWidth * 300)
+            
+            //height = 200
         }
+        
+        
+        
         let width = UIScreen.main.bounds.width
         
         return CGSize(width: width, height: height)
@@ -374,6 +366,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         //Sets up text bubble cell to a specified width
         if let text = message.text{
             cell.bubbleWidthAnchor?.constant = estimatedframeForText(text: text).width + 32
+        } else if message.imageUrl != nil{
+            //fall in here if it's an image message
+            
+            cell.bubbleWidthAnchor?.constant = 300
         }
         
         return cell
@@ -443,9 +439,37 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             
             recipientUserMessageRef.updateChildValues([messageId:1])
         }
-        
-        
     }//End of handleSend()
+    
+    private func sendMessagWithImageUrl(imageUrl: String, image: UIImage){
+        
+        let ref = Database.database().reference().child("messages") //Make a reference to the database & create new node "messages"
+        let childRef = ref.childByAutoId() // Create unique id nodes for each child of "messages"
+        let toId = user?.id
+        let fromId = Auth.auth().currentUser!.uid //Grab the currents user's uid
+        let timeStamp = Int(NSDate().timeIntervalSince1970)
+        let values = ["toId": toId!, "fromId": fromId, "timeStamp": timeStamp, "imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height] as [String : Any] //Create the expected dictionary containing the string of our text field
+        childRef.updateChildValues(values) //Update the database
+        inputTextField.text = nil //Erase the text when 'send' is tapped
+        
+        childRef.updateChildValues(values) { (error, ref) in
+            
+            if error != nil{
+                print(error!)
+                return
+            }
+            
+            let userMessagesRef = Database.database().reference().child("user-messages").child(fromId).child(toId!)
+            let messageId = childRef.key
+            
+            userMessagesRef.updateChildValues([messageId:1])
+            
+            let recipientUserMessageRef = Database.database().reference().child("user-messages").child(toId!).child(fromId)
+            
+            recipientUserMessageRef.updateChildValues([messageId:1])
+        }
+        
+    }//End of sendMessagWithImageUrl
     
     
 }//End ChatLogController
