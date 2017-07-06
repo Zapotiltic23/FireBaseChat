@@ -19,6 +19,9 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         }
     }
     
+    var startingImageView: UIImageView?
+    var blackBackground: UIView?
+    var startingFrame: CGRect?
     let cellId = "cellId"
     var messages = [Message]()
     var containerViewBottomAnchor: NSLayoutConstraint?
@@ -88,6 +91,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
+        imagePickerController.allowsEditing = true //Gives the ability to edit the photo before selecting it
         
         present(imagePickerController, animated: true, completion: nil)
         
@@ -358,6 +362,8 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
         
+        cell.chatLogController = self
+        
         let message = messages[indexPath.item]
         cell.textView.text = message.text
         setUpCell(cell: cell, message: message)
@@ -366,9 +372,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         //Sets up text bubble cell to a specified width
         if let text = message.text{
             cell.bubbleWidthAnchor?.constant = estimatedframeForText(text: text).width + 32
+            cell.textView.isHidden = false
         } else if message.imageUrl != nil{
             //fall in here if it's an image message
-            
+            cell.textView.isHidden = true
             cell.bubbleWidthAnchor?.constant = 300
         }
         
@@ -470,6 +477,66 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         }
         
     }//End of sendMessagWithImageUrl
+    
+    func performZoomForStartingImageView(startingImageView: UIImageView){
+        //This function customazes the zoom logic when trying to tap an image message from the chat log controller
+        
+        self.startingImageView = startingImageView
+        self.startingImageView?.isHidden = true
+        
+        startingFrame = startingImageView.superview?.convert(startingImageView.frame, to: nil)
+        
+        
+        let zoomingImageView = UIImageView(frame: startingFrame!)
+        zoomingImageView.backgroundColor = UIColor.green
+        zoomingImageView.image = startingImageView.image
+        zoomingImageView.isUserInteractionEnabled = true
+        zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleZoomOut)))
+        
+        if let keyWindow = UIApplication.shared.keyWindow{
+            
+            blackBackground = UIView(frame: keyWindow.frame)
+            blackBackground?.backgroundColor = UIColor.black
+            blackBackground?.alpha = 0
+            keyWindow.addSubview(blackBackground!)
+            
+            keyWindow.addSubview(zoomingImageView)
+            
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                self.blackBackground?.alpha = 1
+                self.inputContainerView.alpha = 0
+                let height = (self.startingFrame?.height)! / (self.startingFrame?.width)! * keyWindow.frame.width
+                
+                zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
+                zoomingImageView.center = keyWindow.center
+            }, completion: { (completed) in
+                //zoomOutImageView.removeFromSuperview()
+            })
+            
+        }
+        
+    }//End of performZoomForStartingImageView()
+    
+    @objc func handleZoomOut(tapGesture: UITapGestureRecognizer){
+        
+        if let zoomOutImageView = tapGesture.view{
+            //need to animate back out controller
+            
+            zoomOutImageView.layer.cornerRadius = 16
+            zoomOutImageView.clipsToBounds = true
+            
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                zoomOutImageView.frame = self.startingFrame!
+                self.blackBackground?.alpha = 0
+                self.inputContainerView.alpha = 1
+            }, completion: { (completed) in
+                zoomOutImageView.removeFromSuperview()
+                self.startingImageView?.isHidden = false
+                
+            })
+        }
+    }
     
     
 }//End ChatLogController

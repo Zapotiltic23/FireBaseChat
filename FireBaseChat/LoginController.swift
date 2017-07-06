@@ -10,7 +10,7 @@
 import UIKit
 import Firebase
 
-class LoginController: UIViewController {
+class LoginController: UIViewController, UITextFieldDelegate {
     
     
     
@@ -33,6 +33,11 @@ class LoginController: UIViewController {
         view.addSubview(profileImageView)
         view.addSubview(loginRegisterSegmentedControl)
         
+        nameTextField.delegate = self
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        emailTextField.keyboardType = .emailAddress
+        
         //Set up the view container and button constrains with our specified dimensions
         setupInputsContainerView()
         setupRegisterButton()
@@ -40,6 +45,18 @@ class LoginController: UIViewController {
         setupLoginRegisterSegementedControl()
         
     }//End of viewDidLoad()
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        //This function delegate helps dismiss the keyboard when the user taps 'return' or similar.
+        
+        nameTextField.resignFirstResponder()
+        emailTextField.resignFirstResponder()
+        passwordTextField.resignFirstResponder()
+        
+        
+        return true
+    }
     
     //Create the middle white container view for user input
     let inputsContainerView :UIView = {
