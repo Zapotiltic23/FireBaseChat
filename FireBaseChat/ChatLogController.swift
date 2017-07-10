@@ -231,7 +231,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         UIView.animate(withDuration: keyboardDuration!) {
             self.view.layoutIfNeeded()
         }
-    
+        
     }//End of handleKeyboardWillShow()
     
     func observeMessages() {
@@ -283,24 +283,21 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
         var height: CGFloat = 80
         
-        //Adjust the height of the bubble chat cell according to the amount of text inside of it
-        
         let message = messages[indexPath.item]
-        if let text = messages[indexPath.item].text {
+        if let text = message.text {
             height = estimatedframeForText(text: text).height + 20
-        } else if let imageWidth = message.imageWidth?.floatValue, let imageHeight = message.imageHeight?.floatValue{
-            //fall in here if it's an image message
-            //Modify dimwnsions of bubble to fit the dimensions of the image message
+        } else if let imageWidth = message.imageWidth?.floatValue, let imageHeight = message.imageHeight?.floatValue {
             
-            height = CGFloat(imageHeight / imageWidth * 300)
+            // h1 / w1 = h2 / w2
+            // solve for h1
+            // h1 = h2 / w2 * w1
             
-            //height = 200
+            height = CGFloat(imageHeight / imageWidth * 200)
+            //height = 220
+            
         }
         
-        
-        
         let width = UIScreen.main.bounds.width
-        
         return CGSize(width: width, height: height)
     }
     
@@ -359,24 +356,23 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     }//End of setUpCell()
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! ChatMessageCell
         
         cell.chatLogController = self
         
         let message = messages[indexPath.item]
         cell.textView.text = message.text
+        
         setUpCell(cell: cell, message: message)
         
-        
-        //Sets up text bubble cell to a specified width
-        if let text = message.text{
+        if let text = message.text {
+            //a text message
             cell.bubbleWidthAnchor?.constant = estimatedframeForText(text: text).width + 32
             cell.textView.isHidden = false
-        } else if message.imageUrl != nil{
-            //fall in here if it's an image message
+        } else if message.imageUrl != nil {
+            //fall in here if its an image message
+            cell.bubbleWidthAnchor?.constant = 200
             cell.textView.isHidden = true
-            cell.bubbleWidthAnchor?.constant = 300
         }
         
         return cell
@@ -540,3 +536,5 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
     
     
 }//End ChatLogController
+
+

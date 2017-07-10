@@ -54,7 +54,6 @@ class LoginController: UIViewController, UITextFieldDelegate {
         emailTextField.resignFirstResponder()
         passwordTextField.resignFirstResponder()
         
-        
         return true
     }
     

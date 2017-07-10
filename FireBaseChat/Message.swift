@@ -19,11 +19,13 @@ class Message: NSObject {
     var imageHeight: NSNumber?
     var imageWidth: NSNumber?
     
-    init(dictionary: [String: Any]) {
+    init(dictionary: [String: AnyObject]) {
+        super.init()
         self.fromId = dictionary["fromId"] as? String
         self.text = dictionary["text"] as? String
         self.toId = dictionary["toId"] as? String
         self.imageUrl = dictionary["imageUrl"] as? String
+        
         self.timeStamp = dictionary["timeStamp"] as? NSNumber
         self.imageWidth = dictionary["imageWidth"] as? NSNumber
         self.imageHeight = dictionary["imageHeight"] as? NSNumber
