@@ -454,6 +454,9 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         cell.chatLogController = self
         
         let message = messages[indexPath.item]
+        cell.message = message
+        
+        //let message = messages[indexPath.item]
         cell.textView.text = message.text
         
         setUpCell(cell: cell, message: message)
@@ -467,6 +470,14 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             cell.bubbleWidthAnchor?.constant = 200
             cell.textView.isHidden = true
         }
+        
+        cell.playButton.isHidden = message.videoUrl == nil
+        
+//        if message.videoUrl != nil{
+//            cell.playButton.isHidden = false
+//        }else{
+//            cell.playButton.isHidden = true
+//        }
         
         return cell
     }
