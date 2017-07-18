@@ -32,7 +32,7 @@ extension UIImageView{
             return //Exit the function
         }
         
-        //Let's download image from FireBase using our urlSring
+        //Let's download image from FireBase using our urlString
         let url = URL(string: urlString)
         URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
             

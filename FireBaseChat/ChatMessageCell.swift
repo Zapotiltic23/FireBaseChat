@@ -55,6 +55,12 @@ class ChatMessageCell: UICollectionViewCell {
         
     }()
     
+//    lazy var imageScrollView: UIScrollView = {
+//
+//        let scroll = UIScrollView()
+//        return scroll
+//    }()
+    
     let textView: UITextView = {
         
         let tv = UITextView()

@@ -89,6 +89,29 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
     }()
     
+    override func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return self.startingImageView
+    }
+    
+    override func viewDidLoad(){
+        super.viewDidLoad()
+        
+        collectionView?.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        //collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        collectionView?.alwaysBounceVertical = true
+        collectionView?.backgroundColor = UIColor.white
+        //collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.keyboardDismissMode = .interactive
+        
+        self.imageScrollView.delegate = self
+        self.imageScrollView.minimumZoomScale = 1.0
+        self.imageScrollView.maximumZoomScale = 6.0
+        
+        //setupInputComponents() //Set up our Send/Message mechanism to send messages
+        //setUpKeyboardObservers() //Sets up and dismiss observers when the keyboard is toggled on & off
+    }
+    
     @objc func handleUploadTap(){
         
         let imagePickerController = UIImagePickerController()
@@ -247,20 +270,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
     }//End of uploadToFirebaseStorageUsingImage()
     
-    override func viewDidLoad(){
-        super.viewDidLoad()
-        
-        collectionView?.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-        //collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-        collectionView?.alwaysBounceVertical = true
-        collectionView?.backgroundColor = UIColor.white
-        //collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
-        collectionView?.register(ChatMessageCell.self, forCellWithReuseIdentifier: cellId)
-        collectionView?.keyboardDismissMode = .interactive
-        
-        //setupInputComponents() //Set up our Send/Message mechanism to send messages
-        //setUpKeyboardObservers() //Sets up and dismiss observers when the keyboard is toggled on & off
-    }
+    
     
     override var inputAccessoryView: UIView? {
         get {
@@ -472,13 +482,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         }
         
         cell.playButton.isHidden = message.videoUrl == nil
-        
-//        if message.videoUrl != nil{
-//            cell.playButton.isHidden = false
-//        }else{
-//            cell.playButton.isHidden = true
-//        }
-        
+    
         return cell
     }
     
@@ -578,6 +582,17 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
     }//End of sendMessagWithImageUrl
     
+    let imageScrollView: UIScrollView = {
+        
+        let scroll = UIScrollView()
+        scroll.isUserInteractionEnabled = true
+        scroll.bouncesZoom = true
+        scroll.isScrollEnabled = true
+        scroll.showsVerticalScrollIndicator = true
+        scroll.showsHorizontalScrollIndicator = true
+        return scroll
+    }()
+    
     func performZoomForStartingImageView(startingImageView: UIImageView){
         //This function customazes the zoom logic when trying to tap an image message from the chat log controller
         
@@ -588,8 +603,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
         
         
         let zoomingImageView = UIImageView(frame: startingFrame!)
+        self.imageScrollView.frame = startingFrame!
         zoomingImageView.backgroundColor = UIColor.green
         zoomingImageView.image = startingImageView.image
+        
         zoomingImageView.isUserInteractionEnabled = true
         zoomingImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleZoomOut)))
         
@@ -599,8 +616,10 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
             blackBackground?.backgroundColor = UIColor.black
             blackBackground?.alpha = 0
             keyWindow.addSubview(blackBackground!)
+            keyWindow.addSubview(self.imageScrollView)
             
             keyWindow.addSubview(zoomingImageView)
+            
             
             
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
@@ -610,6 +629,7 @@ class ChatLogController: UICollectionViewController, UITextFieldDelegate, UIColl
                 
                 zoomingImageView.frame = CGRect(x: 0, y: 0, width: keyWindow.frame.width, height: height)
                 zoomingImageView.center = keyWindow.center
+                
             }, completion: { (completed) in
                 //zoomOutImageView.removeFromSuperview()
             })
